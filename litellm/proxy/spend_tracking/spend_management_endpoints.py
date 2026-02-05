@@ -1726,7 +1726,11 @@ async def ui_view_spend_logs(  # noqa: PLR0915
                     return datetime.strptime(date_str, fmt).replace(tzinfo=timezone.utc)
                 except ValueError:
                     continue
-            expected = "'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'" if is_v2 else "'YYYY-MM-DD HH:MM:SS'"
+            expected = (
+                "'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'"
+                if is_v2
+                else "'YYYY-MM-DD HH:MM:SS'"
+            )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid date format: {date_str}. Expected: {expected}",
@@ -1766,22 +1770,28 @@ async def ui_view_spend_logs(  # noqa: PLR0915
         # Build metadata filters
         metadata_filters = []
         if key_alias is not None:
-            metadata_filters.append({
-                "path": ["user_api_key_alias"],
-                "string_contains": key_alias,
-            })
+            metadata_filters.append(
+                {
+                    "path": ["user_api_key_alias"],
+                    "string_contains": key_alias,
+                }
+            )
 
         if error_code is not None:
-            metadata_filters.append({
-                "path": ["error_information", "error_code"],
-                "equals": f'"{error_code}"',
-            })
+            metadata_filters.append(
+                {
+                    "path": ["error_information", "error_code"],
+                    "equals": f'"{error_code}"',
+                }
+            )
 
         if error_message is not None:
-            metadata_filters.append({
-                "path": ["error_information", "error_message"],
-                "string_contains": error_message,
-            })
+            metadata_filters.append(
+                {
+                    "path": ["error_information", "error_message"],
+                    "string_contains": error_message,
+                }
+            )
 
         if metadata_filters:
             if len(metadata_filters) == 1:
@@ -2625,9 +2635,6 @@ async def global_spend_per_team():
         sorted(total_spend_per_team.items(), key=lambda item: item[1], reverse=True)
     )
     for team_id in total_spend_per_team:
-        # only add first 10 elements to total_spend_per_team_ui
-        if len(total_spend_per_team_ui) >= 10:
-            break
         if team_id is None:
             team_id = "Unassigned"
         total_spend_per_team_ui.append(
@@ -3150,7 +3157,11 @@ def _can_user_view_spend_log(user_api_key_dict: UserAPIKeyAuth) -> bool:
     """
     user_role = user_api_key_dict.user_role
     user_id = user_api_key_dict.user_id
-    return user_role in (
-        LitellmUserRoles.INTERNAL_USER,
-        LitellmUserRoles.INTERNAL_USER_VIEW_ONLY,
-    ) and user_id is not None
+    return (
+        user_role
+        in (
+            LitellmUserRoles.INTERNAL_USER,
+            LitellmUserRoles.INTERNAL_USER_VIEW_ONLY,
+        )
+        and user_id is not None
+    )
